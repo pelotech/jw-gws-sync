@@ -60,6 +60,8 @@ export interface UpdateUserPayload {
   organizations?: GoogleOrganization[];
   orgUnitPath?: string;
   suspended?: boolean;
+  externalIds?: GoogleExternalId[];
+  relations?: GoogleRelation[];
 }
 
 export interface GoogleGroup {

@@ -6,6 +6,7 @@ import type { EmailGenerator } from "./email.ts";
 import type { GroupManager } from "./groups.ts";
 import type { Config } from "./config.ts";
 import type { CanonicalMember, SyncAction, SyncResult } from "./types/internal.ts";
+import type { UpdateUserPayload } from "./types/google.ts";
 import { toCanonical, computeSyncActions } from "./diff.ts";
 
 export type Logger = {
@@ -124,7 +125,13 @@ export class SyncOrchestrator {
           result.errors.push({
             action,
             error: message,
-            retryable: message.includes("429") || message.includes("5"),
+            retryable:
+              message.includes("500") ||
+              message.includes("502") ||
+              message.includes("503") ||
+              message.includes("504") ||
+              message.includes("429") ||
+              message.includes("timeout"),
           });
           this.logger.error("Action execution failed", {
             type: action.type,
@@ -330,7 +337,7 @@ export class SyncOrchestrator {
 
         await this.gws.updateUser(
           action.email,
-          payload as Parameters<typeof this.gws.updateUser>[1],
+          payload as UpdateUserPayload,
         );
         this.logger.info("Updated user", {
           email: action.email,
