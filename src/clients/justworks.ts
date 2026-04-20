@@ -15,14 +15,20 @@ export class JustworksClient {
   constructor(
     private config: Config,
     private tokenStore: TokenStore,
-    private logger: { info: (msg: string, data?: Record<string, unknown>) => void; warn: (msg: string, data?: Record<string, unknown>) => void; error: (msg: string, data?: Record<string, unknown>) => void },
+    private logger: {
+      info: (msg: string, data?: Record<string, unknown>) => void;
+      warn: (msg: string, data?: Record<string, unknown>) => void;
+      error: (msg: string, data?: Record<string, unknown>) => void;
+    },
   ) {}
 
   /** Ensure we have a valid access token. Refreshes if expired. */
   private async ensureToken(): Promise<string> {
     const tokens = await this.tokenStore.load();
     if (tokens === null) {
-      throw new Error("No tokens available — OAuth flow has not been completed");
+      throw new Error(
+        "No tokens available — OAuth flow has not been completed",
+      );
     }
 
     if (this.tokenStore.isValid(tokens)) {
@@ -48,7 +54,8 @@ export class JustworksClient {
       refresh_token: refreshToken,
     });
 
-    const tokenUrl = this.config.jwBaseUrl.replace(/\/v1$/, "") + "/oauth/token";
+    const tokenUrl = this.config.jwBaseUrl.replace(/\/v1$/, "") +
+      "/oauth/token";
     const response = await fetch(tokenUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -141,7 +148,9 @@ export class JustworksClient {
         params.set("cursor", cursor);
       }
 
-      const response = await this.apiRequest<JustworksListResponse<JustworksMember>>(
+      const response = await this.apiRequest<
+        JustworksListResponse<JustworksMember>
+      >(
         `/members?${params.toString()}`,
       );
 

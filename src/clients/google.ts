@@ -33,7 +33,9 @@ interface CachedToken {
 
 /** Base64url encode a Uint8Array or string. */
 function base64url(input: Uint8Array | string): string {
-  const bytes = typeof input === "string" ? new TextEncoder().encode(input) : input;
+  const bytes = typeof input === "string"
+    ? new TextEncoder().encode(input)
+    : input;
   // Use standard base64 then convert to base64url
   let b64 = "";
   const len = bytes.length;
@@ -42,7 +44,8 @@ function base64url(input: Uint8Array | string): string {
     const b = i + 1 < len ? bytes[i + 1] : 0;
     const c = i + 2 < len ? bytes[i + 2] : 0;
     const triplet = (a << 16) | (b << 8) | c;
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     b64 += chars[(triplet >> 18) & 0x3f];
     b64 += chars[(triplet >> 12) & 0x3f];
     b64 += i + 1 < len ? chars[(triplet >> 6) & 0x3f] : "=";
@@ -70,7 +73,11 @@ export class GoogleWorkspaceClient {
 
   constructor(
     private config: Config,
-    private logger: { info: (msg: string, data?: Record<string, unknown>) => void; warn: (msg: string, data?: Record<string, unknown>) => void; error: (msg: string, data?: Record<string, unknown>) => void },
+    private logger: {
+      info: (msg: string, data?: Record<string, unknown>) => void;
+      warn: (msg: string, data?: Record<string, unknown>) => void;
+      error: (msg: string, data?: Record<string, unknown>) => void;
+    },
   ) {}
 
   /**
@@ -81,11 +88,16 @@ export class GoogleWorkspaceClient {
    * 4. Cache with expiry
    */
   private async ensureToken(): Promise<string> {
-    if (this.cachedToken && Date.now() < this.cachedToken.expiresAt - TOKEN_EXPIRY_BUFFER_MS) {
+    if (
+      this.cachedToken &&
+      Date.now() < this.cachedToken.expiresAt - TOKEN_EXPIRY_BUFFER_MS
+    ) {
       return this.cachedToken.accessToken;
     }
 
-    const sa = JSON.parse(this.config.googleServiceAccountJson) as ServiceAccountKey;
+    const sa = JSON.parse(
+      this.config.googleServiceAccountJson,
+    ) as ServiceAccountKey;
 
     // Build JWT
     const now = Math.floor(Date.now() / 1000);
@@ -138,10 +150,15 @@ export class GoogleWorkspaceClient {
         status: response.status,
         body: text,
       });
-      throw new Error(`Google token exchange failed: ${response.status} ${text}`);
+      throw new Error(
+        `Google token exchange failed: ${response.status} ${text}`,
+      );
     }
 
-    const tokenData = await response.json() as { access_token: string; expires_in: number };
+    const tokenData = await response.json() as {
+      access_token: string;
+      expires_in: number;
+    };
 
     this.cachedToken = {
       accessToken: tokenData.access_token,
@@ -156,12 +173,17 @@ export class GoogleWorkspaceClient {
   }
 
   /** Generic API request with auth, retry, and rate limiting. */
-  private async apiRequest<T>(url: string, options?: RequestInit): Promise<T | null> {
+  private async apiRequest<T>(
+    url: string,
+    options?: RequestInit,
+  ): Promise<T | null> {
     const token = await this.ensureToken();
 
     // Rate limit delay
     if (this.config.rateLimitDelayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, this.config.rateLimitDelayMs));
+      await new Promise((resolve) =>
+        setTimeout(resolve, this.config.rateLimitDelayMs)
+      );
     }
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -281,7 +303,10 @@ export class GoogleWorkspaceClient {
   }
 
   /** Update a user (PATCH). */
-  async updateUser(email: string, payload: UpdateUserPayload): Promise<GoogleUser> {
+  async updateUser(
+    email: string,
+    payload: UpdateUserPayload,
+  ): Promise<GoogleUser> {
     const result = await this.apiRequest<GoogleUser>(
       `${ADMIN_BASE}/users/${encodeURIComponent(email)}`,
       {
@@ -336,7 +361,9 @@ export class GoogleWorkspaceClient {
   }
 
   /** Create a group. */
-  async createGroup(group: { email: string; name: string; description: string }): Promise<GoogleGroup> {
+  async createGroup(
+    group: { email: string; name: string; description: string },
+  ): Promise<GoogleGroup> {
     const result = await this.apiRequest<GoogleGroup>(
       `${ADMIN_BASE}/groups`,
       {
@@ -370,9 +397,13 @@ export class GoogleWorkspaceClient {
       }
 
       const query = params.toString();
-      const url = `${ADMIN_BASE}/groups/${encodeURIComponent(groupKey)}/members${query ? `?${query}` : ""}`;
+      const url = `${ADMIN_BASE}/groups/${
+        encodeURIComponent(groupKey)
+      }/members${query ? `?${query}` : ""}`;
 
-      const response = await this.apiRequest<GoogleListResponse<GoogleGroupMember>>(url);
+      const response = await this.apiRequest<
+        GoogleListResponse<GoogleGroupMember>
+      >(url);
 
       if (response?.members) {
         members.push(...response.members);
@@ -397,7 +428,9 @@ export class GoogleWorkspaceClient {
   /** Remove a member from a group. */
   async removeGroupMember(groupKey: string, email: string): Promise<void> {
     await this.apiRequest<unknown>(
-      `${ADMIN_BASE}/groups/${encodeURIComponent(groupKey)}/members/${encodeURIComponent(email)}`,
+      `${ADMIN_BASE}/groups/${encodeURIComponent(groupKey)}/members/${
+        encodeURIComponent(email)
+      }`,
       { method: "DELETE" },
     );
   }

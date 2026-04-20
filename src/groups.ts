@@ -80,7 +80,9 @@ export class GroupManager {
       if (!deptMembers.has(member.department)) {
         deptMembers.set(member.department, new Set());
       }
-      deptMembers.get(member.department)!.add(member.primaryEmail.toLowerCase());
+      deptMembers.get(member.department)!.add(
+        member.primaryEmail.toLowerCase(),
+      );
     }
 
     // Step 2: Get existing managed groups

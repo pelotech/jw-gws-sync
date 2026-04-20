@@ -9,7 +9,10 @@ import type { Config } from "../src/config.ts";
 const encoder = new TextEncoder();
 
 /** Compute HMAC-SHA256 and return hex string. */
-async function computeHmac(payload: Uint8Array, secret: string): Promise<string> {
+async function computeHmac(
+  payload: Uint8Array,
+  secret: string,
+): Promise<string> {
   const key = await crypto.subtle.importKey(
     "raw",
     encoder.encode(secret),
@@ -86,7 +89,11 @@ Deno.test("verifyWebhookSignature: rejects tampered payload", async () => {
   // Tamper with the payload
   const tamperedPayload = encoder.encode('{"event":"hacked"}');
 
-  const result = await verifyWebhookSignature(tamperedPayload, signature, secret);
+  const result = await verifyWebhookSignature(
+    tamperedPayload,
+    signature,
+    secret,
+  );
   assertEquals(result, false);
 });
 
@@ -114,7 +121,10 @@ Deno.test("webhook handler: deduplicates identical events", async () => {
   const stubOrchestrator = {
     syncMember: (_id: string) => {
       syncCallCount++;
-      return Promise.resolve({ type: "NO_CHANGE" as const, email: "test@test.com" });
+      return Promise.resolve({
+        type: "NO_CHANGE" as const,
+        email: "test@test.com",
+      });
     },
   } as unknown as SyncOrchestrator;
 
@@ -165,7 +175,8 @@ Deno.test("webhook handler: deduplicates identical events", async () => {
 
 Deno.test("webhook handler: returns null for non-matching routes", async () => {
   const stubOrchestrator = {
-    syncMember: () => Promise.resolve({ type: "NO_CHANGE" as const, email: "" }),
+    syncMember: () =>
+      Promise.resolve({ type: "NO_CHANGE" as const, email: "" }),
   } as unknown as SyncOrchestrator;
 
   const config = makeConfig();
@@ -189,7 +200,8 @@ Deno.test("webhook handler: returns null for non-matching routes", async () => {
 
 Deno.test("webhook handler: returns 401 for missing signature", async () => {
   const stubOrchestrator = {
-    syncMember: () => Promise.resolve({ type: "NO_CHANGE" as const, email: "" }),
+    syncMember: () =>
+      Promise.resolve({ type: "NO_CHANGE" as const, email: "" }),
   } as unknown as SyncOrchestrator;
 
   const config = makeConfig();
@@ -205,7 +217,8 @@ Deno.test("webhook handler: returns 401 for missing signature", async () => {
 
 Deno.test("webhook handler: returns 401 for invalid signature", async () => {
   const stubOrchestrator = {
-    syncMember: () => Promise.resolve({ type: "NO_CHANGE" as const, email: "" }),
+    syncMember: () =>
+      Promise.resolve({ type: "NO_CHANGE" as const, email: "" }),
   } as unknown as SyncOrchestrator;
 
   const config = makeConfig();
@@ -214,7 +227,10 @@ Deno.test("webhook handler: returns 401 for invalid signature", async () => {
   const req = new Request("http://localhost/webhooks/justworks", {
     method: "POST",
     body: "{}",
-    headers: { "x-justworks-signature": "0000000000000000000000000000000000000000000000000000000000000000" },
+    headers: {
+      "x-justworks-signature":
+        "0000000000000000000000000000000000000000000000000000000000000000",
+    },
   });
   const resp = await handler(req);
   assertEquals(resp?.status, 401);

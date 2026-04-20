@@ -125,8 +125,7 @@ export function computeSyncActions(
   // Process each JW member
   for (const member of jwMembers) {
     // Find Google user: primary by externalId, fallback by email
-    const googleUser =
-      googleByJwId.get(member.justworksId) ??
+    const googleUser = googleByJwId.get(member.justworksId) ??
       googleByEmail.get(member.primaryEmail.toLowerCase()) ??
       null;
 

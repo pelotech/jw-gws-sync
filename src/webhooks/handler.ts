@@ -106,7 +106,10 @@ export function createWebhookHandler(
       logger.info("Ignoring unsupported webhook event type", {
         type: event.type,
       });
-      return Response.json({ status: "ignored", reason: "unsupported event type" });
+      return Response.json({
+        status: "ignored",
+        reason: "unsupported event type",
+      });
     }
 
     const memberId = event.data.member_id;

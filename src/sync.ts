@@ -5,9 +5,13 @@ import type { GoogleWorkspaceClient } from "./clients/google.ts";
 import type { EmailGenerator } from "./email.ts";
 import type { GroupManager } from "./groups.ts";
 import type { Config } from "./config.ts";
-import type { CanonicalMember, SyncAction, SyncResult } from "./types/internal.ts";
+import type {
+  CanonicalMember,
+  SyncAction,
+  SyncResult,
+} from "./types/internal.ts";
 import type { UpdateUserPayload } from "./types/google.ts";
-import { toCanonical, computeSyncActions } from "./diff.ts";
+import { computeSyncActions, toCanonical } from "./diff.ts";
 
 export type Logger = {
   info: (msg: string, data?: Record<string, unknown>) => void;
@@ -53,7 +57,7 @@ export class SyncOrchestrator {
 
       // Step 2: Filter by configured departments
       const filtered = allMembers.filter((m) =>
-        this.matchesDepartmentFilter(m.department?.name),
+        this.matchesDepartmentFilter(m.department?.name)
       );
       this.logger.info("Filtered members by department", {
         before: allMembers.length,
@@ -125,8 +129,7 @@ export class SyncOrchestrator {
           result.errors.push({
             action,
             error: message,
-            retryable:
-              message.includes("500") ||
+            retryable: message.includes("500") ||
               message.includes("502") ||
               message.includes("503") ||
               message.includes("504") ||
@@ -142,7 +145,7 @@ export class SyncOrchestrator {
         // Rate limiting between actions
         if (this.config.rateLimitDelayMs > 0) {
           await new Promise((resolve) =>
-            setTimeout(resolve, this.config.rateLimitDelayMs),
+            setTimeout(resolve, this.config.rateLimitDelayMs)
           );
         }
       }
@@ -217,8 +220,10 @@ export class SyncOrchestrator {
     );
     const action: SyncAction = actions.find(
       (a) =>
-        (a.type === "CREATE" && a.member.justworksId === canonical.justworksId) ||
-        (a.type === "UPDATE" && a.member.justworksId === canonical.justworksId) ||
+        (a.type === "CREATE" &&
+          a.member.justworksId === canonical.justworksId) ||
+        (a.type === "UPDATE" &&
+          a.member.justworksId === canonical.justworksId) ||
         (a.type === "NO_CHANGE") ||
         (a.type === "SKIP_PROTECTED") ||
         (a.type === "SUSPEND"),
@@ -289,11 +294,9 @@ export class SyncOrchestrator {
           action.changes.familyName !== undefined
         ) {
           payload.name = {
-            givenName:
-              (action.changes.givenName as string) ??
+            givenName: (action.changes.givenName as string) ??
               action.member.givenName,
-            familyName:
-              (action.changes.familyName as string) ??
+            familyName: (action.changes.familyName as string) ??
               action.member.familyName,
           };
         }

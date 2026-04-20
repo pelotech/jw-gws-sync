@@ -1,5 +1,9 @@
 import { assertEquals } from "@std/assert";
-import { toCanonical, computeFieldDiff, computeSyncActions } from "../src/diff.ts";
+import {
+  computeFieldDiff,
+  computeSyncActions,
+  toCanonical,
+} from "../src/diff.ts";
 import type { CanonicalMember } from "../src/types/internal.ts";
 import type { GoogleUser } from "../src/types/google.ts";
 import type { JustworksMember } from "../src/types/justworks.ts";

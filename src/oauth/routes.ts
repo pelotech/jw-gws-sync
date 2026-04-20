@@ -55,7 +55,9 @@ function adminPageHtml(query: URLSearchParams): string {
 <body>
   <div class="container">
     <h1>Justworks OAuth</h1>
-    ${successMsg ? `<div class="msg success">${escapeHtml(successMsg)}</div>` : ""}
+    ${
+    successMsg ? `<div class="msg success">${escapeHtml(successMsg)}</div>` : ""
+  }
     ${errorMsg ? `<div class="msg error">${escapeHtml(errorMsg)}</div>` : ""}
     <div id="status" class="status disconnected">
       <div class="label">Loading...</div>
@@ -194,7 +196,9 @@ async function handleCallback(
       });
       return Response.redirect(
         new URL(
-          `/oauth?error=${encodeURIComponent("Token exchange failed: " + resp.status)}`,
+          `/oauth?error=${
+            encodeURIComponent("Token exchange failed: " + resp.status)
+          }`,
           url.origin,
         ).toString(),
         302,
@@ -222,7 +226,9 @@ async function handleCallback(
     logger.error("OAuth callback error", { error: String(error) });
     return Response.redirect(
       new URL(
-        `/oauth?error=${encodeURIComponent("Unexpected error during token exchange")}`,
+        `/oauth?error=${
+          encodeURIComponent("Unexpected error during token exchange")
+        }`,
         url.origin,
       ).toString(),
       302,
@@ -264,7 +270,11 @@ export function createOAuthRoutes(
     if (req.method === "GET" && url.pathname === "/oauth/authorize") {
       const state = generateState();
       const authUrl =
-        `https://payroll.justworks.com/oauth/authorize?client_id=${encodeURIComponent(config.jwClientId)}&redirect_uri=${encodeURIComponent(config.jwRedirectUri)}&response_type=code&state=${state}`;
+        `https://payroll.justworks.com/oauth/authorize?client_id=${
+          encodeURIComponent(config.jwClientId)
+        }&redirect_uri=${
+          encodeURIComponent(config.jwRedirectUri)
+        }&response_type=code&state=${state}`;
       logger.info("Redirecting to Justworks authorization", { authUrl });
       return Response.redirect(authUrl, 302);
     }

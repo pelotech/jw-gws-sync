@@ -9,7 +9,11 @@ interface LogEntry {
   data?: Record<string, unknown>;
 }
 
-function write(level: LogLevel, message: string, data?: Record<string, unknown>): void {
+function write(
+  level: LogLevel,
+  message: string,
+  data?: Record<string, unknown>,
+): void {
   const entry: LogEntry = {
     timestamp: new Date().toISOString(),
     level,

@@ -17,18 +17,18 @@ export interface CanonicalMember {
 export type SyncAction =
   | { type: "CREATE"; member: CanonicalMember }
   | {
-      type: "UPDATE";
-      email: string;
-      changes: Record<string, unknown>;
-      member: CanonicalMember;
-    }
+    type: "UPDATE";
+    email: string;
+    changes: Record<string, unknown>;
+    member: CanonicalMember;
+  }
   | { type: "SUSPEND"; email: string; justworksId: string }
   | {
-      type: "SKIP_PROTECTED";
-      email: string;
-      justworksId: string;
-      reason: string;
-    }
+    type: "SKIP_PROTECTED";
+    email: string;
+    justworksId: string;
+    reason: string;
+  }
   | { type: "NO_CHANGE"; email: string };
 
 export interface SyncError {
