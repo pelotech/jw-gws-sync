@@ -50,6 +50,26 @@ function optionalEnv(name: string, defaultValue: string): string {
 }
 
 export function loadConfig(): Config {
+  const syncIntervalMinutes = parseInt(optionalEnv("SYNC_INTERVAL_MINUTES", "60"), 10);
+  if (isNaN(syncIntervalMinutes)) {
+    throw new Error("SYNC_INTERVAL_MINUTES must be a valid number");
+  }
+
+  const maxDeletesPerSync = parseInt(optionalEnv("MAX_DELETES_PER_SYNC", "10"), 10);
+  if (isNaN(maxDeletesPerSync)) {
+    throw new Error("MAX_DELETES_PER_SYNC must be a valid number");
+  }
+
+  const rateLimitDelayMs = parseInt(optionalEnv("RATE_LIMIT_DELAY_MS", "100"), 10);
+  if (isNaN(rateLimitDelayMs)) {
+    throw new Error("RATE_LIMIT_DELAY_MS must be a valid number");
+  }
+
+  const port = parseInt(optionalEnv("PORT", "8080"), 10);
+  if (isNaN(port)) {
+    throw new Error("PORT must be a valid number");
+  }
+
   return {
     // Justworks
     jwClientId: requireEnv("JW_CLIENT_ID"),
@@ -65,10 +85,10 @@ export function loadConfig(): Config {
 
     // Sync
     emailDomain: requireEnv("EMAIL_DOMAIN"),
-    syncIntervalMinutes: parseInt(optionalEnv("SYNC_INTERVAL_MINUTES", "60"), 10),
+    syncIntervalMinutes,
     dryRun: optionalEnv("DRY_RUN", "false") === "true",
-    maxDeletesPerSync: parseInt(optionalEnv("MAX_DELETES_PER_SYNC", "10"), 10),
-    rateLimitDelayMs: parseInt(optionalEnv("RATE_LIMIT_DELAY_MS", "100"), 10),
+    maxDeletesPerSync,
+    rateLimitDelayMs,
     defaultOrgUnitPath: optionalEnv("DEFAULT_ORG_UNIT_PATH", "/"),
     groupPrefix: optionalEnv("GROUP_PREFIX", "justworks"),
     syncDepartments: optionalEnv("SYNC_DEPARTMENTS", "*"),
@@ -77,7 +97,7 @@ export function loadConfig(): Config {
 
     // Server
     webhookSecret: requireEnv("WEBHOOK_SECRET"),
-    port: parseInt(optionalEnv("PORT", "8080"), 10),
+    port,
 
     // Storage
     tokenStoragePath: optionalEnv("TOKEN_STORAGE_PATH", "/data/jw-tokens.json"),

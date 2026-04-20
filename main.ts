@@ -28,7 +28,6 @@ function main(): void {
     logger.info("Shutting down gracefully...");
     await server.shutdown();
     logger.info("Server stopped");
-    Deno.exit(0);
   };
 
   Deno.addSignalListener("SIGTERM", () => {
