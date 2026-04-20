@@ -36,7 +36,7 @@ export async function verifyWebhookSignature(
     ["sign"],
   );
 
-  const expected = await crypto.subtle.sign("HMAC", key, payload);
+  const expected = await crypto.subtle.sign("HMAC", key, payload as BufferSource);
   const expectedHex = toHex(expected);
 
   // Both must be the same length for a valid comparison
