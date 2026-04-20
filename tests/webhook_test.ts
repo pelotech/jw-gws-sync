@@ -20,7 +20,7 @@ async function computeHmac(
     false,
     ["sign"],
   );
-  const sig = await crypto.subtle.sign("HMAC", key, payload);
+  const sig = await crypto.subtle.sign("HMAC", key, payload as BufferSource);
   return Array.from(new Uint8Array(sig))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");

@@ -1,0 +1,40 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-json
+
+  - repo: local
+    hooks:
+      - id: deno-fmt
+        name: deno fmt
+        entry: deno fmt
+        language: system
+        types_or: [ts, tsx, javascript, json, markdown]
+        pass_filenames: false
+
+      - id: deno-lint
+        name: deno lint
+        entry: deno lint
+        language: system
+        types_or: [ts, tsx, javascript]
+        pass_filenames: false
+
+      - id: deno-check
+        name: deno check main.ts
+        entry: deno check main.ts
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: deno-test
+        name: deno test
+        entry: deno test --allow-env --allow-net --allow-read --allow-write
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

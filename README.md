@@ -85,3 +85,14 @@ Requires Deno 2.x. The Dockerfile builds from `denoland/deno:2.0`.
 
 CI runs fmt, lint, type-check, and tests on every PR and on `main` (see
 `.github/workflows/`).
+
+### Pre-commit hooks
+
+Mirror CI locally so fmt/lint/type-check run on every commit and tests run on
+push:
+
+```sh
+brew install pre-commit   # or: pipx install pre-commit
+pre-commit install
+pre-commit install --hook-type pre-push
+```
