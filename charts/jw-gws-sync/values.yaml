@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/pelotech/justworks-googleworkspace-sync
+  repository: ghcr.io/pelotech/jw-gws-sync
   tag: latest
   pullPolicy: IfNotPresent
 

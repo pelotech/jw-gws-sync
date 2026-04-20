@@ -15,7 +15,7 @@ import { startScheduler } from "./src/scheduler.ts";
 
 function main(): void {
   const buildVersion = Deno.env.get("BUILD_VERSION") ?? "dev";
-  logger.info("Starting justworks-googleworkspace-sync", { buildVersion });
+  logger.info("Starting jw-gws-sync", { buildVersion });
 
   const config = loadConfig();
 

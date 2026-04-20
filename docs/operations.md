@@ -85,8 +85,7 @@ Kubernetes probe tunings are in `values.yaml`:
 
 Logs are structured JSON on stdout. Useful searches:
 
-- `"Starting justworks-googleworkspace-sync"` — pod startup, includes
-  `buildVersion`.
+- `"Starting jw-gws-sync"` — pod startup, includes `buildVersion`.
 - `"Configuration loaded"` — dumps non-secret config at INFO.
 - `"Starting sync"` / `"Sync complete"` — per-run boundaries.
 - `"Dry run"` — present when `DRY_RUN=true` blocks a mutation.
@@ -101,8 +100,8 @@ breadcrumbs indicating exactly how far it got.
 Releases follow conventional commits on `main`. A release PR opened by
 release-please bumps `Chart.yaml` (`version` + `appVersion`) and
 `charts/jw-gws-sync/README.md` together. Merging it creates a git tag, an OCI
-image at `ghcr.io/pelotech/justworks-googleworkspace-sync:<version>`, and a
-chart at `ghcr.io/pelotech/charts/jw-gws-sync:<version>`.
+image at `ghcr.io/pelotech/jw-gws-sync:<version>`, and a chart at
+`ghcr.io/pelotech/charts/jw-gws-sync:<version>`.
 
 Upgrade in-cluster:
 

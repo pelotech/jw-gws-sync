@@ -1,4 +1,4 @@
-# justworks-googleworkspace-sync
+# jw-gws-sync
 
 A background service that keeps Google Workspace in sync with your Justworks
 roster. Active employees get provisioned as Google users; terminations are
@@ -6,7 +6,7 @@ suspended; department-based Google Groups are created and reconciled.
 
 ## Status
 
-- **Image:** `ghcr.io/pelotech/justworks-googleworkspace-sync:<version>`
+- **Image:** `ghcr.io/pelotech/jw-gws-sync:<version>`
 - **Helm chart:** `oci://ghcr.io/pelotech/charts/jw-gws-sync`
 - **Current version:** `0.1.0`
 
@@ -68,7 +68,7 @@ Full walkthrough: [`docs/deployment.md`](docs/deployment.md).
   breaker, webhooks, troubleshooting
 - [`docs/roadmap.md`](docs/roadmap.md) — forward-looking direction, including
   planned multi-tenancy
-- [`docs/superpowers/specs/2026-04-20-justworks-google-workspace-sync-design.md`](docs/superpowers/specs/2026-04-20-justworks-google-workspace-sync-design.md)
+- [`docs/superpowers/specs/2026-04-20-jw-gws-sync-design.md`](docs/superpowers/specs/2026-04-20-jw-gws-sync-design.md)
   — original design spec (architecture reference)
 
 ## Development

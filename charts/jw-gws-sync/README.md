@@ -11,7 +11,7 @@ Justworks to Google Workspace sync service
 | Key                       | Type   | Default                          | Description                                |
 | ------------------------- | ------ | -------------------------------- | ------------------------------------------ |
 | replicaCount              | int    | `1`                              | Number of replicas                         |
-| image.repository          | string | `"ghcr.io/pelotech/justworks-googleworkspace-sync"` | Image repository                           |
+| image.repository          | string | `"ghcr.io/pelotech/jw-gws-sync"` | Image repository                           |
 | image.tag                 | string | `"latest"`                       | Image tag                                  |
 | image.pullPolicy          | string | `"IfNotPresent"`                 | Image pull policy                          |
 | service.type              | string | `"ClusterIP"`                    | Kubernetes service type                    |

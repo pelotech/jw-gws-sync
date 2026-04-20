@@ -3,7 +3,7 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "justworks-googleworkspace-sync",
+      "package-name": "jw-gws-sync",
       "include-component-in-tag": false,
       "extra-files": [
         {
