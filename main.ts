@@ -14,6 +14,9 @@ import { createWebhookHandler } from "./src/webhooks/handler.ts";
 import { startScheduler } from "./src/scheduler.ts";
 
 function main(): void {
+  const buildVersion = Deno.env.get("BUILD_VERSION") ?? "dev";
+  logger.info("Starting justworks-googleworkspace-sync", { buildVersion });
+
   const config = loadConfig();
 
   logger.info("Configuration loaded", {
@@ -74,10 +77,14 @@ function main(): void {
   };
 
   Deno.addSignalListener("SIGTERM", () => {
-    shutdown().catch((err) => logger.error("Shutdown error", { error: String(err) }));
+    shutdown().catch((err) =>
+      logger.error("Shutdown error", { error: String(err) })
+    );
   });
   Deno.addSignalListener("SIGINT", () => {
-    shutdown().catch((err) => logger.error("Shutdown error", { error: String(err) }));
+    shutdown().catch((err) =>
+      logger.error("Shutdown error", { error: String(err) })
+    );
   });
 
   logger.info("Service started", {

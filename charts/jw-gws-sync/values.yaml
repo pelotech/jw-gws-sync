@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/pelotech/jw-gws-sync
+  repository: ghcr.io/pelotech/justworks-googleworkspace-sync
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -18,9 +18,9 @@ resources:
     memory: 256Mi
 
 env: {}
-  # JW_CLIENT_ID: ""
-  # JW_CLIENT_SECRET: ""
-  # etc.
+# JW_CLIENT_ID: ""
+# JW_CLIENT_SECRET: ""
+# etc.
 
 secretName: jw-gws-sync-secrets
 

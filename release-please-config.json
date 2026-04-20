@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "justworks-googleworkspace-sync",
+      "include-component-in-tag": false,
+      "extra-files": [
+        {
+          "type": "yaml",
+          "path": "charts/jw-gws-sync/Chart.yaml",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "yaml",
+          "path": "charts/jw-gws-sync/Chart.yaml",
+          "jsonpath": "$.appVersion"
+        },
+        "charts/jw-gws-sync/README.md"
+      ]
+    }
+  }
+}
