@@ -2,6 +2,8 @@
 
 import { loadConfig } from "./src/config.ts";
 import { logger } from "./src/logger.ts";
+import { TokenStore } from "./src/oauth/store.ts";
+import { createOAuthRoutes } from "./src/oauth/routes.ts";
 import { startServer } from "./src/server.ts";
 
 function main(): void {
@@ -16,12 +18,13 @@ function main(): void {
     groupPrefix: config.groupPrefix,
   });
 
+  const tokenStore = new TokenStore(config.tokenStoragePath);
+  const oauthRoutes = createOAuthRoutes(config, tokenStore);
+
   const server = startServer({
     port: config.port,
-    checkReady: () => {
-      // Phase 1: always ready (token check comes in Phase 2)
-      return true;
-    },
+    checkReady: () => tokenStore.hasValidTokens(),
+    routes: [oauthRoutes],
   });
 
   const shutdown = async () => {
