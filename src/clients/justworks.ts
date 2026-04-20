@@ -48,7 +48,8 @@ export class JustworksClient {
       refresh_token: refreshToken,
     });
 
-    const response = await fetch("https://public-api.justworks.com/oauth/token", {
+    const tokenUrl = this.config.jwBaseUrl.replace(/\/v1$/, "") + "/oauth/token";
+    const response = await fetch(tokenUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: body.toString(),
@@ -76,10 +77,10 @@ export class JustworksClient {
 
   /** Generic fetch wrapper with auth header, retries on 429/5xx, and exponential backoff. */
   private async apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
-    const token = await this.ensureToken();
     const url = `${this.config.jwBaseUrl}${path}`;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      const token = await this.ensureToken();
       const response = await fetch(url, {
         ...options,
         headers: {
