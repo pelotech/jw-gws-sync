@@ -46,7 +46,9 @@ export class TokenStore {
     }
 
     const tmpPath = this.storagePath + ".tmp";
-    await Deno.writeTextFile(tmpPath, JSON.stringify(tokens, null, 2));
+    await Deno.writeTextFile(tmpPath, JSON.stringify(tokens, null, 2), {
+      mode: 0o600,
+    });
     await Deno.rename(tmpPath, this.storagePath);
 
     logger.info("Tokens saved", { path: this.storagePath });

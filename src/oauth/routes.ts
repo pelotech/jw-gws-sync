@@ -4,12 +4,22 @@ import type { Config } from "../config.ts";
 import { logger } from "../logger.ts";
 import type { TokenStore } from "./store.ts";
 
-let pendingState: string | null = null;
+const STATE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
+const pendingStates = new Map<string, number>();
 
 function generateState(): string {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  const state = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join(
+    "",
+  );
+  // Cleanup expired states before adding a new one
+  const now = Date.now();
+  for (const [s, exp] of pendingStates) {
+    if (now > exp) pendingStates.delete(s);
+  }
+  pendingStates.set(state, now + STATE_EXPIRY_MS);
+  return state;
 }
 
 function adminPageHtml(query: URLSearchParams): string {
@@ -73,11 +83,16 @@ function adminPageHtml(query: URLSearchParams): string {
           det.textContent = "Expires: " + exp + " (" + mins + " min)";
           el.appendChild(det);
           while (actions.firstChild) actions.removeChild(actions.firstChild);
-          const btn = document.createElement("a");
+          const form = document.createElement("form");
+          form.method = "POST";
+          form.action = "/oauth/disconnect";
+          form.style.display = "inline";
+          const btn = document.createElement("button");
+          btn.type = "submit";
           btn.className = "btn btn-disconnect";
-          btn.href = "/oauth/disconnect";
           btn.textContent = "Disconnect";
-          actions.appendChild(btn);
+          form.appendChild(btn);
+          actions.appendChild(form);
         } else {
           el.className = "status disconnected";
           while (el.firstChild) el.removeChild(el.firstChild);
@@ -133,17 +148,18 @@ async function handleCallback(
     );
   }
 
-  if (!state || state !== pendingState) {
-    logger.error("OAuth callback state mismatch", {
-      expected: pendingState ?? "none",
+  const stateExpiry = state ? pendingStates.get(state) : undefined;
+  if (!state || stateExpiry === undefined || Date.now() > stateExpiry) {
+    logger.error("OAuth callback state mismatch or expired", {
       received: state ?? "none",
     });
+    if (state) pendingStates.delete(state);
     return Response.redirect(
       new URL("/oauth?error=Invalid+state+parameter", url.origin).toString(),
       302,
     );
   }
-  pendingState = null;
+  pendingStates.delete(state);
 
   if (!code) {
     return Response.redirect(
@@ -247,7 +263,6 @@ export function createOAuthRoutes(
 
     if (req.method === "GET" && url.pathname === "/oauth/authorize") {
       const state = generateState();
-      pendingState = state;
       const authUrl =
         `https://payroll.justworks.com/oauth/authorize?client_id=${encodeURIComponent(config.jwClientId)}&redirect_uri=${encodeURIComponent(config.jwRedirectUri)}&response_type=code&state=${state}`;
       logger.info("Redirecting to Justworks authorization", { authUrl });
@@ -262,7 +277,7 @@ export function createOAuthRoutes(
       return await handleStatus(tokenStore);
     }
 
-    if (req.method === "GET" && url.pathname === "/oauth/disconnect") {
+    if (req.method === "POST" && url.pathname === "/oauth/disconnect") {
       await tokenStore.clear();
       logger.info("OAuth tokens disconnected by admin");
       return Response.redirect(
