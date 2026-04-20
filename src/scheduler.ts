@@ -63,7 +63,7 @@ export function startScheduler(
 
   // Run immediately if configured
   if (options.runImmediately !== false) {
-    runSync();
+    runSync().catch(() => {}); // errors already logged inside runSync
   }
 
   const intervalMs = intervalMinutes * 60 * 1000;

@@ -74,10 +74,10 @@ function main(): void {
   };
 
   Deno.addSignalListener("SIGTERM", () => {
-    shutdown();
+    shutdown().catch((err) => logger.error("Shutdown error", { error: String(err) }));
   });
   Deno.addSignalListener("SIGINT", () => {
-    shutdown();
+    shutdown().catch((err) => logger.error("Shutdown error", { error: String(err) }));
   });
 
   logger.info("Service started", {
