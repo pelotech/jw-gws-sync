@@ -81,7 +81,7 @@ deno task lint   # lint
 deno task check  # type-check main.ts
 ```
 
-Requires Deno 2.x. The Dockerfile builds from `denoland/deno:2.0`.
+Requires Deno 2.x. The Dockerfile builds from `denoland/deno:2.1.4`.
 
 CI runs fmt, lint, type-check, and tests on every PR and on `main` (see
 `.github/workflows/`).

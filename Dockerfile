@@ -1,11 +1,11 @@
-FROM denoland/deno:2.0 AS builder
+FROM denoland/deno:2.1.4 AS builder
 WORKDIR /app
 COPY deno.json deno.lock* ./
 COPY main.ts ./
 COPY src/ ./src/
 RUN deno cache main.ts
 
-FROM denoland/deno:2.0
+FROM denoland/deno:2.1.4
 WORKDIR /app
 COPY --from=builder /app .
 ARG BUILD_VERSION=dev
