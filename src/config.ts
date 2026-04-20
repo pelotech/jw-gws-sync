@@ -1,105 +1,94 @@
-/** Load and validate environment variables into a typed Config object */
+/** Load and validate environment variables into a typed Config object using Zod */
 
-export interface Config {
+import { z } from "zod";
+
+const nonEmptyString = z.string().min(1, "must not be empty");
+
+const configSchema = z.object({
   // Justworks
-  jwClientId: string;
-  jwClientSecret: string;
-  jwRedirectUri: string;
-  jwBaseUrl: string;
+  jwClientId: nonEmptyString,
+  jwClientSecret: nonEmptyString,
+  jwRedirectUri: nonEmptyString,
+  jwBaseUrl: z.string().default("https://public-api.justworks.com/v1"),
 
   // Google
-  googleServiceAccountJson: string;
-  googleAdminEmail: string;
-  googleDomain: string;
-  googleCustomerId: string;
+  googleServiceAccountJson: nonEmptyString,
+  googleAdminEmail: nonEmptyString,
+  googleDomain: nonEmptyString,
+  googleCustomerId: nonEmptyString,
 
   // Sync
-  emailDomain: string;
-  syncIntervalMinutes: number;
-  dryRun: boolean;
-  maxDeletesPerSync: number;
-  rateLimitDelayMs: number;
-  defaultOrgUnitPath: string;
-  groupPrefix: string;
-  syncDepartments: string;
-  syncIncludeNoDepartment: boolean;
-  protectedGroup: string;
+  emailDomain: nonEmptyString,
+  syncIntervalMinutes: z.coerce.number().int().positive().default(60),
+  dryRun: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
+  maxDeletesPerSync: z.coerce.number().int().positive().default(10),
+  rateLimitDelayMs: z.coerce.number().int().nonnegative().default(100),
+  defaultOrgUnitPath: z.string().default("/"),
+  groupPrefix: z.string().default("justworks"),
+  syncDepartments: z.string().default("*"),
+  syncIncludeNoDepartment: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+  protectedGroup: z.string().default(""),
 
   // Server
-  webhookSecret: string;
-  port: number;
+  webhookSecret: nonEmptyString,
+  port: z.coerce.number().int().positive().max(65535).default(8080),
 
   // Storage
-  tokenStoragePath: string;
-}
+  tokenStoragePath: z.string().default("/data/jw-tokens.json"),
+});
 
-function requireEnv(name: string): string {
-  const value = Deno.env.get(name);
-  if (value === undefined || value === "") {
-    throw new Error(`Required environment variable ${name} is not set`);
-  }
-  return value;
-}
+export type Config = z.infer<typeof configSchema>;
 
-function optionalEnv(name: string, defaultValue: string): string {
-  const value = Deno.env.get(name);
-  if (value === undefined || value === "") {
-    return defaultValue;
-  }
-  return value;
-}
+const ENV_MAP: Record<keyof z.input<typeof configSchema>, string> = {
+  jwClientId: "JW_CLIENT_ID",
+  jwClientSecret: "JW_CLIENT_SECRET",
+  jwRedirectUri: "JW_REDIRECT_URI",
+  jwBaseUrl: "JW_BASE_URL",
+  googleServiceAccountJson: "GOOGLE_SERVICE_ACCOUNT_JSON",
+  googleAdminEmail: "GOOGLE_ADMIN_EMAIL",
+  googleDomain: "GOOGLE_DOMAIN",
+  googleCustomerId: "GOOGLE_CUSTOMER_ID",
+  emailDomain: "EMAIL_DOMAIN",
+  syncIntervalMinutes: "SYNC_INTERVAL_MINUTES",
+  dryRun: "DRY_RUN",
+  maxDeletesPerSync: "MAX_DELETES_PER_SYNC",
+  rateLimitDelayMs: "RATE_LIMIT_DELAY_MS",
+  defaultOrgUnitPath: "DEFAULT_ORG_UNIT_PATH",
+  groupPrefix: "GROUP_PREFIX",
+  syncDepartments: "SYNC_DEPARTMENTS",
+  syncIncludeNoDepartment: "SYNC_INCLUDE_NO_DEPARTMENT",
+  protectedGroup: "PROTECTED_GROUP",
+  webhookSecret: "WEBHOOK_SECRET",
+  port: "PORT",
+  tokenStoragePath: "TOKEN_STORAGE_PATH",
+};
 
 export function loadConfig(): Config {
-  const syncIntervalMinutes = parseInt(optionalEnv("SYNC_INTERVAL_MINUTES", "60"), 10);
-  if (isNaN(syncIntervalMinutes)) {
-    throw new Error("SYNC_INTERVAL_MINUTES must be a valid number");
+  const raw: Record<string, string | undefined> = {};
+  for (const [key, envName] of Object.entries(ENV_MAP)) {
+    const value = Deno.env.get(envName);
+    if (value !== undefined && value !== "") {
+      raw[key] = value;
+    }
   }
 
-  const maxDeletesPerSync = parseInt(optionalEnv("MAX_DELETES_PER_SYNC", "10"), 10);
-  if (isNaN(maxDeletesPerSync)) {
-    throw new Error("MAX_DELETES_PER_SYNC must be a valid number");
+  const result = configSchema.safeParse(raw);
+  if (!result.success) {
+    const errors = result.error.issues
+      .map((i) => {
+        const field = String(i.path[0]);
+        const envName = ENV_MAP[field as keyof typeof ENV_MAP] ?? field;
+        return `  ${envName}: ${i.message}`;
+      })
+      .join("\n");
+    throw new Error(`Invalid configuration:\n${errors}`);
   }
 
-  const rateLimitDelayMs = parseInt(optionalEnv("RATE_LIMIT_DELAY_MS", "100"), 10);
-  if (isNaN(rateLimitDelayMs)) {
-    throw new Error("RATE_LIMIT_DELAY_MS must be a valid number");
-  }
-
-  const port = parseInt(optionalEnv("PORT", "8080"), 10);
-  if (isNaN(port)) {
-    throw new Error("PORT must be a valid number");
-  }
-
-  return {
-    // Justworks
-    jwClientId: requireEnv("JW_CLIENT_ID"),
-    jwClientSecret: requireEnv("JW_CLIENT_SECRET"),
-    jwRedirectUri: requireEnv("JW_REDIRECT_URI"),
-    jwBaseUrl: optionalEnv("JW_BASE_URL", "https://public-api.justworks.com/v1"),
-
-    // Google
-    googleServiceAccountJson: requireEnv("GOOGLE_SERVICE_ACCOUNT_JSON"),
-    googleAdminEmail: requireEnv("GOOGLE_ADMIN_EMAIL"),
-    googleDomain: requireEnv("GOOGLE_DOMAIN"),
-    googleCustomerId: requireEnv("GOOGLE_CUSTOMER_ID"),
-
-    // Sync
-    emailDomain: requireEnv("EMAIL_DOMAIN"),
-    syncIntervalMinutes,
-    dryRun: optionalEnv("DRY_RUN", "false") === "true",
-    maxDeletesPerSync,
-    rateLimitDelayMs,
-    defaultOrgUnitPath: optionalEnv("DEFAULT_ORG_UNIT_PATH", "/"),
-    groupPrefix: optionalEnv("GROUP_PREFIX", "justworks"),
-    syncDepartments: optionalEnv("SYNC_DEPARTMENTS", "*"),
-    syncIncludeNoDepartment: optionalEnv("SYNC_INCLUDE_NO_DEPARTMENT", "true") === "true",
-    protectedGroup: optionalEnv("PROTECTED_GROUP", ""),
-
-    // Server
-    webhookSecret: requireEnv("WEBHOOK_SECRET"),
-    port,
-
-    // Storage
-    tokenStoragePath: optionalEnv("TOKEN_STORAGE_PATH", "/data/jw-tokens.json"),
-  };
+  return result.data;
 }
