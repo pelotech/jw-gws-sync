@@ -12,7 +12,7 @@ export interface GoogleOrganization {
 }
 
 export interface GoogleExternalId {
-  type: "organization";
+  type: "custom";
   customType: "justworks_id";
   value: string;
 }
@@ -48,6 +48,7 @@ export interface CreateUserPayload {
   phones?: GooglePhone[];
   organizations?: GoogleOrganization[];
   externalIds?: GoogleExternalId[];
+  relations?: GoogleRelation[];
 }
 
 export interface UpdateUserPayload {
