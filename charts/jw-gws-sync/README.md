@@ -1,8 +1,8 @@
 # jw-gws-sync
 
-### version: 0.1.0<!-- x-release-please-version -->
+### version: 0.2.0<!-- x-release-please-version -->
 
-### appVersion: 0.1.0 <!-- x-release-please-version -->
+### appVersion: 0.2.0 <!-- x-release-please-version -->
 
 Justworks to Google Workspace sync service
 
